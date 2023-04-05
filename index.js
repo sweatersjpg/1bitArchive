@@ -49,12 +49,12 @@ let selected = false;
 let mouseJustReleased = false;
 
 function draw() {
-    background(0, 0, 0, 40);
+    background(0, 0, 0, 64);
 
     if (searchMode) {
 
         stroke(255);
-        fill(0);
+        noFill();
         rect(14, 14, width - 14 * 2);
 
         let x = floor((mouseX - 16) / (78));
@@ -70,7 +70,8 @@ function draw() {
             let x = (i % 8) * (78);
             let y = floor(i / 8) * (78);
 
-            fill(px[i] ? 255 : 0);
+            if (!px[i]) continue;
+            fill(px[i] * 255);
             noStroke();
             rect(16 + x, 16 + y, 78);
         }
