@@ -25,6 +25,8 @@ function setup() {
     }
 
     pageP.elt.innerText = toHexView(pageNum);
+
+    frameRate(30);
 }
 
 let searchMode = false;
@@ -42,8 +44,12 @@ let px = [
 
 let brush = 1;
 
+let selected = false;
+
+let mouseJustReleased = false;
+
 function draw() {
-    background(0);
+    background(0, 0, 0, 40);
 
     if (searchMode) {
 
@@ -80,22 +86,37 @@ function draw() {
 
     let index = multiplyBase256(pageNum, 64);
 
+    let mx = (mouseX - 16);
+    let my = (mouseY - 16);
+
     for (let i = 0; i < 64; i++) {
         let x = (i % 8) * (64 + 16);
         let y = floor(i / 8) * (64 + 16);
 
-        stroke(255);
+        let pressed = false;
 
-        fill(0);
-        rect(x - 2 + 16, y - 2 + 16, 64 + 4, 64 + 4);
+        if (mx > x && mx < x + 64 && my > y && my < y + 64) {
+            stroke(255);
+
+            fill(0);
+            rect(x - 2 + 16, y - 2 + 16, 64 + 4, 64 + 4);
+            if (mouseJustReleased) pressed = true;
+        }
 
         noStroke();
-        drawSprite(index, 16 + x, 16 + y, 64);
+        let pixels = drawSprite(index, 16 + x, 16 + y, 64);
+
+        if (pressed) {
+            search();
+            px = pixels;
+            print(pixels);
+        }
 
         index = addBase256(index, "1");
     }
 
-    noLoop();
+    mouseJustReleased = false;
+    // noLoop();
 }
 
 function mousePressed() {
@@ -106,6 +127,19 @@ function mousePressed() {
 
     let i = y * 8 + x;
     brush = (px[i] + 1) % 2;
+}
+
+function mouseReleased() {
+    mouseJustReleased = true;
+}
+
+function keyPressed() {
+    if (!searchMode) return;
+
+    if (keyCode == 27) search();
+    if (keyCode == 13) findDrawing();
+    if (keyCode == 67) clearDrawing();
+    if (keyCode == 73) invertDrawing();
 }
 
 function search() {
@@ -160,6 +194,8 @@ function linkToPage(page) {
 // --- sprites ---
 
 function drawSprite(n, X, Y, w) {
+    let out = [];
+
     n = encrypt(n);
     n = n.split(":").map((x) => toBin(parseInt(x)));
     w /= 8;
@@ -167,10 +203,14 @@ function drawSprite(n, X, Y, w) {
     for (let y = 0; y < 8; y++) {
         for (let x = 0; x < 8; x++) {
             let c = n[y].charAt(x);
+            out.unshift(parseInt(c));
+            if (!parseInt(c)) continue;
             fill(c * 255);
             rect(X + (7 - x) * w, Y + (7 - y) * w, w, w);
         }
     }
+
+    return out;
 }
 
 function toBin(x) {
