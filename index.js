@@ -134,8 +134,13 @@ function mouseReleased() {
 }
 
 function keyPressed() {
-    if (!searchMode) return;
+    if (keyCode == 2 || keyCode == 83) search();
+    if (keyCode == 82) randomPage();
 
+    if (keyCode == LEFT_ARROW) prev();
+    if (keyCode == RIGHT_ARROW) next();
+
+    if (!searchMode) return;
     if (keyCode == 27) search();
     if (keyCode == 13) findDrawing();
     if (keyCode == 67) clearDrawing();
